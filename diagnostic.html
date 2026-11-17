@@ -1,0 +1,21 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnostic installation</title><link rel="manifest" href="manifest.webmanifest">
+<style>body{font:16px/1.5 system-ui,sans-serif;margin:0;padding:18px;background:#fff3ec;color:#2e1f1f}h1{font-size:1.3rem;margin:.2em 0 .6em}
+.r{background:#fff;border:1px solid #f3d2c7;border-radius:12px;padding:10px 12px;margin:8px 0}.ok{border-left:6px solid #2e7d4f}.ko{border-left:6px solid #b3402f}.wa{border-left:6px solid #d89a1f}
+small{display:block;color:#7a5f5a}button{font:inherit;padding:12px 16px;border:0;border-radius:999px;background:#b5533c;color:#fff;margin:10px 0}</style></head><body>
+<h1>Diagnostic : installation de l’application</h1><div id="o"></div><button id="ib" style="display:none">Installer l’application</button>
+<script>
+var o=document.getElementById("o"),dp=null;
+function add(c,t,s){var d=document.createElement("div");d.className="r "+c;d.innerHTML=(c=="ok"?"\u2705 ":c=="ko"?"\u274C ":"\u26A0\uFE0F ")+t+(s?"<small>"+s+"</small>":"");o.appendChild(d)}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();dp=e;var b=document.getElementById("ib");b.style.display="block";b.onclick=function(){dp.prompt()};add("ok","Chrome autorise l\u2019installation","Appuie sur le bouton \u00ab Installer \u00bb ci-dessous.")});
+(async function(){
+ add(location.protocol=="https:"?"ok":"ko","Adresse en https",location.href);
+ add(matchMedia("(display-mode: standalone)").matches?"ok":"wa","Mode d\u2019affichage",matchMedia("(display-mode: standalone)").matches?"Tu es d\u00e9j\u00e0 dans l\u2019application install\u00e9e.":"Tu es dans le navigateur.");
+ try{var h=await fetch("index.html",{cache:"no-cache"});var t=await h.text();add(h.ok&&/rel=["']manifest["']/.test(t)?"ok":"ko","index.html contient le lien vers le manifeste",h.ok?(/rel=["']manifest["']/.test(t)?"":"Ton index.html n\u2019est pas la version PWA : renvoie celui du dossier."):"index.html introuvable ("+h.status+")")}catch(e){add("ko","index.html illisible",String(e))}
+ var m=null;try{var r=await fetch("manifest.webmanifest",{cache:"no-cache"});if(!r.ok)throw new Error("erreur "+r.status);m=await r.json();add("ok","manifest.webmanifest lu","nom : "+m.name+" \u00b7 affichage : "+m.display)}catch(e){add("ko","manifest.webmanifest introuvable ou illisible",String(e)+" \u2192 renvoie ce fichier sur GitHub.")}
+ if(m)for(var i=0;i<(m.icons||[]).length;i++){await new Promise(function(res){var ic=m.icons[i],im=new Image();im.onload=function(){add(im.naturalWidth>=192?"ok":"ko","Ic\u00f4ne "+ic.src+" ("+ic.purpose+")",im.naturalWidth+" \u00d7 "+im.naturalHeight+" px");res()};im.onerror=function(){add("ko","Ic\u00f4ne introuvable : "+ic.src,"renvoie ce fichier sur GitHub, avec exactement ce nom.");res()};im.src=ic.src+"?v="+Date.now()})}
+ try{var s=await fetch("sw.js",{cache:"no-cache"});add(s.ok?"ok":"ko","sw.js pr\u00e9sent",s.ok?"":"erreur "+s.status)}catch(e){add("ko","sw.js illisible",String(e))}
+ try{var rg=await navigator.serviceWorker.getRegistration("./");add(rg&&rg.active?"ok":"wa","Mode hors ligne (service worker)",rg&&rg.active?"actif":"pas encore actif : ouvre l\u2019application une fois, attends 10 secondes, recharge.")}catch(e){add("ko","Service worker indisponible",String(e))}
+ setTimeout(function(){if(!dp)add("wa","Chrome ne propose pas encore l\u2019installation","Si tout est vert ci-dessus : attends 10 secondes, recharge cette page, ou ferme et rouvre Chrome. Sinon corrige la ligne rouge.")},4000);
+})();
+</script></body></html>
