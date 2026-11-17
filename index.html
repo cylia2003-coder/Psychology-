@@ -7215,4 +7215,16 @@ if("serviceWorker" in navigator){window.addEventListener("load",function(){navig
  /* nouvelle version trouvée : elle est utilisée au prochain lancement */
  r.addEventListener("updatefound",function(){});}).catch(function(){})})}
 </script>
+<style id="install-v60">
+#inst{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:60;display:none;align-items:center;gap:8px;padding:12px 18px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font:600 .95rem system-ui,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+#inst.on{display:flex}
+</style>
+<script id="install-v60">
+(function(){var dp=null,b=null;
+function btn(){if(b)return b;b=document.createElement("button");b.id="inst";b.type="button";b.textContent="\u{1F4F2} Installer l\u2019application";
+ b.onclick=function(){if(!dp)return;dp.prompt();dp.userChoice.then(function(){dp=null;b.classList.remove("on")})};document.body.appendChild(b);return b}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();dp=e;btn().classList.add("on")});
+window.addEventListener("appinstalled",function(){dp=null;if(b)b.classList.remove("on")});
+})();
+</script>
 </body></html>
